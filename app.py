@@ -24,6 +24,7 @@ from lead_cleaner import (
 DOMAIN_REGISTRY_PATH = Path("Domaner.csv")
 HISTORY_PATH = Path(".lead_history.json")
 HISTORY_FILES_DIR = Path(".lead_history_files")
+TABLE_HEIGHT = 650
 
 
 st.set_page_config(
@@ -439,6 +440,7 @@ with tab_all:
         working_df,
         use_container_width=True,
         hide_index=True,
+        height=TABLE_HEIGHT,
         num_rows="dynamic",
         key="all_editor",
     )
@@ -461,6 +463,7 @@ with tab_review:
             review_df,
             use_container_width=True,
             hide_index=True,
+            height=TABLE_HEIGHT,
             num_rows="dynamic",
             key=f"review_editor_{st.session_state.review_mark_all}",
         )
@@ -492,11 +495,11 @@ with tab_review:
 
 with tab_ready:
     ready_df = working_df[ready_mask]
-    st.dataframe(ready_df, use_container_width=True, hide_index=True)
+    st.dataframe(ready_df, use_container_width=True, hide_index=True, height=TABLE_HEIGHT)
 
 with tab_excluded:
     excluded_df = working_df[excluded_mask]
-    st.dataframe(excluded_df, use_container_width=True, hide_index=True)
+    st.dataframe(excluded_df, use_container_width=True, hide_index=True, height=TABLE_HEIGHT)
     if not excluded_df.empty and st.button("Återställ alla exkluderade"):
         st.session_state.excluded_rows = set()
         st.rerun()
@@ -524,7 +527,12 @@ with tab_export:
         except Exception as exc:
             st.error(f"Kunde inte köra dublettkontroll: {exc}")
 
-    st.dataframe(import_df.style.apply(highlight_duplicate_rows, axis=1), use_container_width=True, hide_index=True)
+    st.dataframe(
+        import_df.style.apply(highlight_duplicate_rows, axis=1),
+        use_container_width=True,
+        hide_index=True,
+        height=TABLE_HEIGHT,
+    )
 
     with st.expander("Dublettkontroll", expanded=False):
         st.caption("Valfritt sista steg. Ladda upp en befintlig lista om du vill markera matchningar på namn och/eller e-post.")
