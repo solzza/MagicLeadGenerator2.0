@@ -447,15 +447,17 @@ with tab_all:
 
 with tab_review:
     review_df = working_df[review_mask].copy()
-    review_df.insert(0, "Klar", st.session_state.review_mark_all)
+    review_df.insert(0, "Klar", False)
     with st.form("review_form"):
+        if st.session_state.review_mark_all:
+            st.info("Bulkmarkering är aktiv: alla kvarvarande rader i Granska markeras som klara när du klickar Markera valda.")
         edited_review = st.data_editor(
             review_df,
             use_container_width=True,
             hide_index=True,
             height=TABLE_HEIGHT,
             num_rows="dynamic",
-            key=f"review_editor_{st.session_state.review_mark_all}",
+            key="review_editor",
         )
         review_button_cols = st.columns([1.35, 1.35, 1.35, 1.95])
         with review_button_cols[0]:
@@ -479,10 +481,14 @@ with tab_review:
             st.session_state.reviewed_overrides[row_id] = values
 
         if submitted_review:
-            selected = edited_not_removed[edited_not_removed["Klar"] == True]
+            if st.session_state.review_mark_all:
+                selected = edited_not_removed
+            else:
+                selected = edited_not_removed[edited_not_removed["Klar"] == True]
             for _, row in selected.iterrows():
                 row_id = int(row["Rad"])
                 st.session_state.reviewed_rows.add(row_id)
+            st.session_state.review_mark_all = False
         elif submitted_mark_all:
             st.session_state.review_mark_all = True
         elif submitted_clear_all:
