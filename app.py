@@ -292,6 +292,15 @@ st.title("Magic Leads Generator")
 with st.sidebar:
     st.header("Input")
     raw_file = st.file_uploader("Evaboot-rådata", type=["xlsx", "xlsm", "xls", "csv"])
+    if DOMAIN_REGISTRY_PATH.exists():
+        registry_file = None
+        st.caption("Domänregister: Domaner.csv")
+    else:
+        registry_file = st.file_uploader(
+            "Bolag/domän-register",
+            type=["xlsx", "xlsm", "xls", "csv"],
+            help="Behövs i deployment om Domaner.csv inte finns med i GitHub-repot.",
+        )
 
     st.header("Inställningar")
     fuzzy_threshold = st.slider("Fuzzy match-gräns", min_value=0.80, max_value=1.00, value=0.92, step=0.01)
@@ -359,8 +368,17 @@ try:
     if DOMAIN_REGISTRY_PATH.exists():
         registry_df = load_default_registry(str(DOMAIN_REGISTRY_PATH))
         st.caption("Använder Domaner.csv som bolags-/domänregister.")
+    elif registry_file is not None:
+        registry_sheets = available_sheets(registry_file)
+        registry_sheet = st.selectbox(
+            "Registerflik",
+            registry_sheets,
+            index=registry_sheets.index("Domaner") if "Domaner" in registry_sheets else 0,
+        ) if registry_sheets else 0
+        registry_df = read_table(registry_file, registry_sheet)
+        st.caption(f"Använder uppladdat bolags-/domänregister: {registry_file.name}")
     else:
-        st.warning("Inget register uppladdat och Domaner.csv hittades inte i projektmappen.")
+        st.warning("Domaner.csv hittades inte. Ladda upp bolag/domän-registret i sidopanelen.")
         registry_df = pd.DataFrame(columns=["Bolag", "Uppdaterad domän"])
 except Exception as exc:
     st.error(f"Kunde inte läsa bolagsregistret: {exc}")
