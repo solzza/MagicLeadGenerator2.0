@@ -447,16 +447,6 @@ with tab_all:
 
 with tab_review:
     review_df = working_df[review_mask].copy()
-    review_controls = st.columns([1.35, 1.35, 3.3])
-    with review_controls[0]:
-        mark_all_clicked = st.button("Markera alla", use_container_width=True)
-    with review_controls[1]:
-        clear_all_clicked = st.button("Avmarkera alla", use_container_width=True)
-    if mark_all_clicked:
-        st.session_state.review_mark_all = True
-    if clear_all_clicked:
-        st.session_state.review_mark_all = False
-
     review_df.insert(0, "Klar", st.session_state.review_mark_all)
     with st.form("review_form"):
         edited_review = st.data_editor(
@@ -467,10 +457,14 @@ with tab_review:
             num_rows="dynamic",
             key=f"review_editor_{st.session_state.review_mark_all}",
         )
-        review_button_cols = st.columns([1.35, 4.65])
+        review_button_cols = st.columns([1.35, 1.35, 1.35, 1.95])
         with review_button_cols[0]:
             submitted_review = st.form_submit_button("Markera valda", type="primary", use_container_width=True)
-    if submitted_review:
+        with review_button_cols[1]:
+            submitted_mark_all = st.form_submit_button("Markera alla", use_container_width=True)
+        with review_button_cols[2]:
+            submitted_clear_all = st.form_submit_button("Avmarkera alla", use_container_width=True)
+    if submitted_review or submitted_mark_all or submitted_clear_all:
         original_review_rows = set(review_df["Rad"].astype(int).tolist())
         edited_review_rows = set(edited_review["Rad"].astype(int).tolist()) if "Rad" in edited_review.columns else set()
         removed_rows = original_review_rows - edited_review_rows
@@ -478,18 +472,21 @@ with tab_review:
         for row_id in removed_rows:
             st.session_state.excluded_rows.add(row_id)
 
-        selected = edited_review[edited_review["Klar"] == True]
-        for _, row in selected.iterrows():
-            row_id = int(row["Rad"])
-            st.session_state.reviewed_rows.add(row_id)
-            values = row.drop(labels=["Klar"], errors="ignore").to_dict()
-            st.session_state.reviewed_overrides[row_id] = values
-
         edited_not_removed = edited_review[edited_review["Rad"].notna()] if "Rad" in edited_review.columns else edited_review
         for _, row in edited_not_removed.iterrows():
             row_id = int(row["Rad"])
             values = row.drop(labels=["Klar"], errors="ignore").to_dict()
             st.session_state.reviewed_overrides[row_id] = values
+
+        if submitted_review:
+            selected = edited_not_removed[edited_not_removed["Klar"] == True]
+            for _, row in selected.iterrows():
+                row_id = int(row["Rad"])
+                st.session_state.reviewed_rows.add(row_id)
+        elif submitted_mark_all:
+            st.session_state.review_mark_all = True
+        elif submitted_clear_all:
+            st.session_state.review_mark_all = False
         st.rerun()
     st.caption("Granska är ett sidospår. Rader här går inte till Export förrän du bockar i Klar och klickar på knappen.")
 
