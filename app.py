@@ -489,7 +489,7 @@ with tab_review:
     review_df = working_df[review_mask].copy()
     review_df.insert(0, "Klar", False)
     if st.session_state.review_mark_all:
-        st.info("Bulkmarkering är aktiv: alla kvarvarande rader i Granska markeras som klara när du klickar Markera valda.")
+        st.info("Bulkmarkering är aktiv: alla kvarvarande rader i Granska markeras som klara när du klickar Bekräfta markerade rader som klara.")
     edited_review = st.data_editor(
         review_df,
         use_container_width=True,
@@ -506,7 +506,7 @@ with tab_review:
 
     review_button_cols = st.columns([1.35, 1.35, 1.35, 1.95])
     with review_button_cols[0]:
-        submitted_review = st.button("Markera valda", type="primary", use_container_width=True)
+        submitted_review = st.button("Bekräfta markerade rader som klara", type="primary", use_container_width=True)
     with review_button_cols[1]:
         submitted_mark_all = st.button("Markera alla", use_container_width=True)
     with review_button_cols[2]:
