@@ -75,6 +75,11 @@ st.markdown(
         border-right: 1px solid var(--mlg-line);
     }
 
+    section[data-testid="stSidebar"],
+    section[data-testid="stSidebar"] * {
+        color: var(--mlg-ink) !important;
+    }
+
     section[data-testid="stSidebar"] h2,
     section[data-testid="stSidebar"] h3 {
         color: var(--mlg-ink);
@@ -82,11 +87,42 @@ st.markdown(
         letter-spacing: 0;
     }
 
+    section[data-testid="stSidebar"] label,
+    section[data-testid="stSidebar"] p,
+    section[data-testid="stSidebar"] span,
+    section[data-testid="stSidebar"] small,
+    section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
+        color: var(--mlg-ink) !important;
+    }
+
+    section[data-testid="stSidebar"] [data-testid="stCaptionContainer"],
+    section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInstructions"],
+    section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInstructions"] * {
+        color: var(--mlg-muted) !important;
+    }
+
     div[data-testid="stFileUploader"] {
         background: rgba(255, 255, 255, 0.72);
         border: 1px solid var(--mlg-line);
         border-radius: 8px;
         padding: 0.6rem;
+    }
+
+    section[data-testid="stSidebar"] div[data-testid="stFileUploader"],
+    section[data-testid="stSidebar"] div[data-testid="stFileUploaderDropzone"] {
+        background: #ffffff !important;
+        border-color: var(--mlg-line) !important;
+    }
+
+    section[data-testid="stSidebar"] div[data-testid="stFileUploaderDropzone"] button {
+        background: #f8faf7 !important;
+        border: 1px solid var(--mlg-line) !important;
+        color: var(--mlg-ink) !important;
+    }
+
+    section[data-testid="stSidebar"] div[data-testid="stFileUploaderDropzone"] svg {
+        color: var(--mlg-ink) !important;
+        fill: var(--mlg-ink) !important;
     }
 
     div[data-testid="stMetric"] {
@@ -195,6 +231,24 @@ st.markdown(
         color: var(--mlg-teal);
     }
 
+    section[data-testid="stSidebar"] [data-baseweb="slider"] div {
+        color: var(--mlg-teal) !important;
+    }
+
+    section[data-testid="stSidebar"] [data-baseweb="input"],
+    section[data-testid="stSidebar"] [data-baseweb="textarea"],
+    section[data-testid="stSidebar"] textarea,
+    section[data-testid="stSidebar"] input {
+        background: #ffffff !important;
+        border-color: var(--mlg-line) !important;
+        color: var(--mlg-ink) !important;
+    }
+
+    section[data-testid="stSidebar"] textarea::placeholder,
+    section[data-testid="stSidebar"] input::placeholder {
+        color: var(--mlg-muted) !important;
+    }
+
     textarea,
     input {
         border-radius: 8px !important;
@@ -236,6 +290,11 @@ st.markdown(
         border-right: 1px solid var(--mlg-dark-line);
     }
 
+    section[data-testid="stSidebar"],
+    section[data-testid="stSidebar"] * {
+        color: var(--mlg-dark-ink) !important;
+    }
+
     section[data-testid="stSidebar"] h2,
     section[data-testid="stSidebar"] h3 {
         color: var(--mlg-dark-ink);
@@ -243,11 +302,42 @@ st.markdown(
         letter-spacing: 0;
     }
 
+    section[data-testid="stSidebar"] label,
+    section[data-testid="stSidebar"] p,
+    section[data-testid="stSidebar"] span,
+    section[data-testid="stSidebar"] small,
+    section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
+        color: var(--mlg-dark-ink) !important;
+    }
+
+    section[data-testid="stSidebar"] [data-testid="stCaptionContainer"],
+    section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInstructions"],
+    section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInstructions"] * {
+        color: var(--mlg-dark-muted) !important;
+    }
+
     div[data-testid="stFileUploader"] {
         background: rgba(22, 27, 34, 0.78);
         border: 1px solid var(--mlg-dark-line);
         border-radius: 8px;
         padding: 0.6rem;
+    }
+
+    section[data-testid="stSidebar"] div[data-testid="stFileUploader"],
+    section[data-testid="stSidebar"] div[data-testid="stFileUploaderDropzone"] {
+        background: #161b22 !important;
+        border-color: var(--mlg-dark-line) !important;
+    }
+
+    section[data-testid="stSidebar"] div[data-testid="stFileUploaderDropzone"] button {
+        background: #1b222c !important;
+        border: 1px solid var(--mlg-dark-line) !important;
+        color: var(--mlg-dark-ink) !important;
+    }
+
+    section[data-testid="stSidebar"] div[data-testid="stFileUploaderDropzone"] svg {
+        color: var(--mlg-dark-ink) !important;
+        fill: var(--mlg-dark-ink) !important;
     }
 
     div[data-testid="stMetric"] {
@@ -351,6 +441,24 @@ st.markdown(
 
     .magic-loader-text span {
         color: var(--mlg-dark-muted);
+    }
+
+    section[data-testid="stSidebar"] [data-baseweb="slider"] div {
+        color: var(--mlg-dark-teal) !important;
+    }
+
+    section[data-testid="stSidebar"] [data-baseweb="input"],
+    section[data-testid="stSidebar"] [data-baseweb="textarea"],
+    section[data-testid="stSidebar"] textarea,
+    section[data-testid="stSidebar"] input {
+        background: #161b22 !important;
+        border-color: var(--mlg-dark-line) !important;
+        color: var(--mlg-dark-ink) !important;
+    }
+
+    section[data-testid="stSidebar"] textarea::placeholder,
+    section[data-testid="stSidebar"] input::placeholder {
+        color: var(--mlg-dark-muted) !important;
     }
 
     textarea,
