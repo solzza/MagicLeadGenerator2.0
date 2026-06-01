@@ -231,6 +231,12 @@ def append_history(entry: dict[str, object]) -> None:
     save_history(history)
 
 
+def reset_review_state() -> None:
+    st.session_state.reviewed_rows = set()
+    st.session_state.excluded_rows = set()
+    st.session_state.review_mark_all = False
+
+
 def safe_history_filename(name: str) -> str:
     path = Path(name)
     stem = re.sub(r"[^A-Za-z0-9._-]+", "_", path.stem).strip("._-") or "rawdata"
@@ -262,10 +268,8 @@ def render_history() -> None:
                 if st.button(label, key=f"open_history_{index}", use_container_width=True):
                     st.session_state.history_raw_path = str(item["path"])
                     st.session_state.history_raw_name = file_name
-                    st.session_state.reviewed_rows = set()
-                    st.session_state.reviewed_overrides = {}
-                    st.session_state.excluded_rows = set()
-                    st.session_state.review_mark_all = False
+                    reset_review_state()
+                    st.session_state.clean_input_key = None
             else:
                 st.caption(label)
 
@@ -391,26 +395,37 @@ options = CleanOptions(
     remove_title_keywords=keywords,
 )
 
-cleaned_df = clean_leads(raw_df, registry_df, options).reset_index(drop=True)
-cleaned_df.insert(0, "Rad", cleaned_df.index + 1)
-
 if "reviewed_rows" not in st.session_state:
     st.session_state.reviewed_rows = set()
-if "reviewed_overrides" not in st.session_state:
-    st.session_state.reviewed_overrides = {}
 if "excluded_rows" not in st.session_state:
     st.session_state.excluded_rows = set()
 if "review_mark_all" not in st.session_state:
     st.session_state.review_mark_all = False
+if "clean_input_key" not in st.session_state:
+    st.session_state.clean_input_key = None
+if "working_df" not in st.session_state:
+    st.session_state.working_df = pd.DataFrame()
 
-working_df = cleaned_df.copy()
-for row_id, values in st.session_state.reviewed_overrides.items():
-    row_matches = working_df.index[working_df["Rad"] == row_id].tolist()
-    if row_matches:
-        row_index = row_matches[0]
-        for column, value in values.items():
-            if column in working_df.columns:
-                working_df.at[row_index, column] = value
+registry_key = (
+    str(DOMAIN_REGISTRY_PATH.resolve()) if DOMAIN_REGISTRY_PATH.exists()
+    else f"{getattr(registry_file, 'name', '')}:{getattr(registry_file, 'size', '')}:{registry_sheet if 'registry_sheet' in locals() else ''}"
+)
+clean_input_key = (
+    raw_source_name,
+    getattr(raw_file, "size", "") if raw_file is not None else str(history_raw_path),
+    raw_sheet if isinstance(raw_sheet, str) else "",
+    registry_key,
+    fuzzy_threshold,
+    keywords,
+)
+if st.session_state.clean_input_key != clean_input_key:
+    cleaned_df = clean_leads(raw_df, registry_df, options).reset_index(drop=True)
+    cleaned_df.insert(0, "Rad", cleaned_df.index + 1)
+    st.session_state.working_df = cleaned_df
+    st.session_state.clean_input_key = clean_input_key
+    reset_review_state()
+
+working_df = st.session_state.working_df.copy()
 
 total = len(working_df)
 auto_ready_mask = working_df["Issues"].fillna("") == ""
@@ -475,10 +490,17 @@ with tab_review:
             st.session_state.excluded_rows.add(row_id)
 
         edited_not_removed = edited_review[edited_review["Rad"].notna()] if "Rad" in edited_review.columns else edited_review
+        saved_working_df = st.session_state.working_df.copy()
         for _, row in edited_not_removed.iterrows():
             row_id = int(row["Rad"])
             values = row.drop(labels=["Klar"], errors="ignore").to_dict()
-            st.session_state.reviewed_overrides[row_id] = values
+            row_matches = saved_working_df.index[saved_working_df["Rad"] == row_id].tolist()
+            if row_matches:
+                row_index = row_matches[0]
+                for column, value in values.items():
+                    if column in saved_working_df.columns:
+                        saved_working_df.at[row_index, column] = value
+        st.session_state.working_df = saved_working_df
 
         if submitted_review:
             if st.session_state.review_mark_all:
