@@ -797,23 +797,15 @@ with tab_export:
             )
 
     excel_bytes = dataframe_to_xlsx_bytes(export_output_df)
-    if st.button("Exportera till Excel", type="primary"):
-        output_dir = Path.home() / "Downloads"
-        output_dir.mkdir(exist_ok=True)
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_path = output_dir / f"upsales_import_{timestamp}.xlsx"
-        output_path.write_bytes(excel_bytes)
-        append_history(
-            {
-                "key": f"export:{output_path}",
-                "type": "Export",
-                "name": output_path.name,
-                "rows": len(export_output_df),
-                "sheet": "Upsales Import",
-                "path": str(output_path),
-            }
-        )
-        st.success(f"Sparad: {output_path.resolve()}")
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    excel_file_name = f"upsales_import_{timestamp}.xlsx"
+    st.download_button(
+        "Exportera till Excel",
+        data=excel_bytes,
+        file_name=excel_file_name,
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        type="primary",
+    )
     st.download_button(
         "Ladda ner CSV",
         data=export_output_df.to_csv(index=False).encode("utf-8-sig"),
