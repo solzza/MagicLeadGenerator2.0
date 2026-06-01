@@ -465,7 +465,7 @@ excluded_mask = working_df["Rad"].isin(st.session_state.excluded_rows)
 ready_mask = (auto_ready_mask | manual_ready_mask) & ~excluded_mask
 review_mask = ~(auto_ready_mask | manual_ready_mask | excluded_mask)
 ready = int(ready_mask.sum())
-needs_review = total - ready
+needs_review = int(review_mask.sum())
 
 summary_cols = st.columns(5)
 summary_cols[0].metric("Leads", total)
@@ -493,7 +493,7 @@ with tab_all:
 
 with tab_review:
     review_df = working_df[review_mask].copy()
-    review_df.insert(0, "Klar", False)
+    review_df.insert(0, "Klar", st.session_state.review_mark_all)
     if st.session_state.review_mark_all:
         st.info("Bulkmarkering är aktiv: alla kvarvarande rader i Granska markeras som klara när du klickar Verkställ ändringar.")
     edited_review = st.data_editor(
@@ -531,9 +531,11 @@ with tab_review:
         st.rerun()
     if submitted_mark_all:
         st.session_state.review_mark_all = True
+        st.session_state.review_editor_version += 1
         st.rerun()
     if submitted_clear_all:
         st.session_state.review_mark_all = False
+        st.session_state.review_editor_version += 1
         st.rerun()
     st.caption("Granska är ett sidospår. Rader här går inte till Export förrän du bockar i Klar och klickar på knappen.")
 
