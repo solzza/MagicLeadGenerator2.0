@@ -11,9 +11,7 @@ analysis/
 extracted_vba/
 MagicLeadGenerator2.0/
 
-Domaner.csv
 *.xls
 *.xlsx
 *.xlsm
 ~$*
-
