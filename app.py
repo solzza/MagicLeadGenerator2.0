@@ -25,6 +25,7 @@ DOMAIN_REGISTRY_PATH = Path("Domaner.csv")
 HISTORY_PATH = Path(".lead_history.json")
 HISTORY_FILES_DIR = Path(".lead_history_files")
 TABLE_HEIGHT = 650
+SELECT_COLUMN = "Välj"
 
 
 st.set_page_config(
@@ -192,6 +193,164 @@ st.markdown(
 
     .stSlider [data-baseweb="slider"] > div {
         color: var(--mlg-teal);
+    }
+
+    textarea,
+    input {
+        border-radius: 8px !important;
+    }
+    }
+
+    @media (prefers-color-scheme: dark) {
+    :root {
+        --mlg-dark-bg: #0e1117;
+        --mlg-dark-panel: #161b22;
+        --mlg-dark-panel-soft: #1b222c;
+        --mlg-dark-ink: #fafafa;
+        --mlg-dark-muted: #a3aab7;
+        --mlg-dark-line: #30363d;
+        --mlg-dark-accent: #d8be6a;
+        --mlg-dark-teal: #5db9bd;
+    }
+
+    .stApp {
+        background: var(--mlg-dark-bg);
+        color: var(--mlg-dark-ink);
+    }
+
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+    }
+
+    h1 {
+        color: var(--mlg-dark-ink);
+        font-size: 2.1rem;
+        font-weight: 750;
+        letter-spacing: 0;
+        margin-bottom: 1.25rem;
+    }
+
+    section[data-testid="stSidebar"] {
+        background: #11161d;
+        border-right: 1px solid var(--mlg-dark-line);
+    }
+
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3 {
+        color: var(--mlg-dark-ink);
+        font-weight: 700;
+        letter-spacing: 0;
+    }
+
+    div[data-testid="stFileUploader"] {
+        background: rgba(22, 27, 34, 0.78);
+        border: 1px solid var(--mlg-dark-line);
+        border-radius: 8px;
+        padding: 0.6rem;
+    }
+
+    div[data-testid="stMetric"] {
+        background: var(--mlg-dark-panel);
+        border: 1px solid var(--mlg-dark-line);
+        border-left: 4px solid var(--mlg-dark-teal);
+        border-radius: 8px;
+        padding: 0.75rem 0.9rem;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+    }
+
+    div[data-testid="stMetric"] label,
+    div[data-testid="stMetric"] [data-testid="stMetricLabel"] {
+        color: var(--mlg-dark-muted);
+        font-weight: 650;
+    }
+
+    div[data-testid="stMetricValue"] {
+        color: var(--mlg-dark-ink);
+        font-weight: 760;
+    }
+
+    div[data-testid="stTabs"] button[role="tab"] {
+        border-radius: 8px 8px 0 0;
+        padding: 0.65rem 1rem;
+        color: var(--mlg-dark-muted);
+        font-weight: 650;
+    }
+
+    div[data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
+        background: var(--mlg-dark-panel);
+        color: var(--mlg-dark-ink);
+        border-bottom: 3px solid var(--mlg-dark-accent);
+    }
+
+    div[data-testid="stDataFrame"],
+    div[data-testid="stDataEditor"] {
+        border: 1px solid var(--mlg-dark-line);
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.28);
+    }
+
+    div[data-testid="stExpander"] {
+        background: rgba(22, 27, 34, 0.8);
+        border: 1px solid var(--mlg-dark-line);
+        border-radius: 8px;
+    }
+
+    div[data-testid="stInfo"],
+    div[data-testid="stAlert"] {
+        border-radius: 8px;
+    }
+
+    .stButton > button,
+    .stDownloadButton > button {
+        border-radius: 8px;
+        border: 1px solid #30363d;
+        background: var(--mlg-dark-panel-soft);
+        color: var(--mlg-dark-ink);
+        font-weight: 700;
+        white-space: nowrap;
+        box-shadow: 0 5px 14px rgba(0, 0, 0, 0.22);
+    }
+
+    .stButton > button p,
+    .stDownloadButton > button p {
+        white-space: nowrap;
+    }
+
+    .stButton > button:hover,
+    .stDownloadButton > button:hover {
+        border-color: var(--mlg-dark-accent);
+        color: #fff7cf;
+        background: #202733;
+    }
+
+    button[kind="primary"] {
+        border-radius: 8px;
+        border: 1px solid #5db9bd;
+        background: #2d6f73;
+        color: #ffffff;
+        font-weight: 750;
+        box-shadow: 0 6px 16px rgba(93, 185, 189, 0.2);
+    }
+
+    button[kind="primary"]:hover {
+        border-color: #8bd7da;
+        background: #245f62;
+        color: #ffffff;
+    }
+
+    .magic-loader {
+        border-color: rgba(216, 190, 106, 0.34);
+        background: rgba(22, 27, 34, 0.82);
+    }
+
+    .magic-loader-text strong {
+        color: var(--mlg-dark-ink);
+    }
+
+    .magic-loader-text span {
+        color: var(--mlg-dark-muted);
     }
 
     textarea,
@@ -557,7 +716,7 @@ def apply_review_edits(edited_review: pd.DataFrame, original_review_rows: set[in
     saved_working_df = st.session_state.working_df.copy()
     for _, row in edited_not_removed.iterrows():
         row_id = int(row["Rad"])
-        values = row.drop(labels=["Klar"], errors="ignore").to_dict()
+        values = row.drop(labels=[SELECT_COLUMN], errors="ignore").to_dict()
         row_matches = saved_working_df.index[saved_working_df["Rad"] == row_id].tolist()
         if row_matches:
             row_index = row_matches[0]
@@ -585,7 +744,7 @@ def apply_export_edits(edited_export: pd.DataFrame, original_export_rows: set[in
         if not row_matches:
             continue
         row_index = row_matches[0]
-        for column, value in row.drop(labels=["Rad"], errors="ignore").items():
+        for column, value in row.drop(labels=["Rad", SELECT_COLUMN], errors="ignore").items():
             if column in saved_working_df.columns:
                 saved_working_df.at[row_index, column] = value
     st.session_state.working_df = saved_working_df
@@ -705,6 +864,8 @@ if "review_editor_version" not in st.session_state:
     st.session_state.review_editor_version = 0
 if "export_editor_version" not in st.session_state:
     st.session_state.export_editor_version = 0
+if "active_tab" not in st.session_state:
+    st.session_state.active_tab = "Alla rader"
 if "clean_input_key" not in st.session_state:
     st.session_state.clean_input_key = None
 if "working_df" not in st.session_state:
@@ -757,9 +918,14 @@ quality_cols[0].metric("Titel saknas/fel", issue_badge_count(working_df, "title_
 quality_cols[1].metric("LinkedIn saknas/fel", issue_badge_count(working_df, "linkedin_missing") + issue_badge_count(working_df, "linkedin_invalid"))
 quality_cols[2].metric("Dubletter", int(working_df["Duplicate Key"].fillna("").ne("").sum()))
 
-tab_all, tab_review, tab_ready, tab_excluded, tab_export = st.tabs(["Alla rader", "Granska", "Klara", "Exkluderade", "Export"])
+active_tab = st.segmented_control(
+    "Flik",
+    ["Alla rader", "Granska", "Klara", "Exkluderade", "Export"],
+    key="active_tab",
+    label_visibility="collapsed",
+)
 
-with tab_all:
+if active_tab == "Alla rader":
     edited_all = st.data_editor(
         working_df,
         use_container_width=True,
@@ -769,11 +935,11 @@ with tab_all:
         key="all_editor",
     )
 
-with tab_review:
+elif active_tab == "Granska":
     review_df = working_df[review_mask].copy()
-    review_df.insert(0, "Klar", st.session_state.review_mark_all)
+    review_df.insert(0, SELECT_COLUMN, st.session_state.review_mark_all)
     if st.session_state.review_mark_all:
-        st.info("Bulkmarkering är aktiv: alla kvarvarande rader i Granska markeras som klara när du klickar Verkställ ändringar.")
+        st.info("Bulkmarkering är aktiv: alla kvarvarande rader i Granska är markerade tills du avmarkerar.")
     edited_review = st.data_editor(
         review_df,
         use_container_width=True,
@@ -781,32 +947,46 @@ with tab_review:
         height=TABLE_HEIGHT,
         num_rows="dynamic",
         key=f"review_editor_{st.session_state.review_editor_version}",
+        column_config={
+            SELECT_COLUMN: st.column_config.CheckboxColumn(SELECT_COLUMN, width="small"),
+            "Rad": None,
+        },
     )
     original_review_rows = set(review_df["Rad"].astype(int).tolist())
     edited_not_removed, removed_rows = apply_review_edits(edited_review, original_review_rows)
     if removed_rows:
         st.session_state.review_editor_version += 1
         st.rerun()
+    selected_review_rows = edited_not_removed[edited_not_removed[SELECT_COLUMN] == True]
 
     review_button_cols = st.columns([1.8, 1.35, 1.35, 1.5])
     with review_button_cols[0]:
         submitted_review = st.button("Verkställ ändringar", type="primary", use_container_width=True)
     with review_button_cols[1]:
-        submitted_mark_all = st.button("Markera alla", use_container_width=True)
+        submitted_exclude = st.button("Exkludera valda", use_container_width=True)
     with review_button_cols[2]:
+        submitted_mark_all = st.button("Markera alla", use_container_width=True)
+    with review_button_cols[3]:
         submitted_clear_all = st.button("Avmarkera alla", use_container_width=True)
 
     if submitted_review:
-        if st.session_state.review_mark_all:
-            selected = edited_not_removed
+        if selected_review_rows.empty:
+            st.warning("Markera minst en rad först.")
         else:
-            selected = edited_not_removed[edited_not_removed["Klar"] == True]
-        for _, row in selected.iterrows():
-            row_id = int(row["Rad"])
-            st.session_state.reviewed_rows.add(row_id)
-        st.session_state.review_mark_all = False
-        st.session_state.review_editor_version += 1
-        st.rerun()
+            for _, row in selected_review_rows.iterrows():
+                st.session_state.reviewed_rows.add(int(row["Rad"]))
+            st.session_state.review_mark_all = False
+            st.session_state.review_editor_version += 1
+            st.rerun()
+    if submitted_exclude:
+        if selected_review_rows.empty:
+            st.warning("Markera minst en rad först.")
+        else:
+            for _, row in selected_review_rows.iterrows():
+                st.session_state.excluded_rows.add(int(row["Rad"]))
+            st.session_state.review_mark_all = False
+            st.session_state.review_editor_version += 1
+            st.rerun()
     if submitted_mark_all:
         st.session_state.review_mark_all = True
         st.session_state.review_editor_version += 1
@@ -815,23 +995,24 @@ with tab_review:
         st.session_state.review_mark_all = False
         st.session_state.review_editor_version += 1
         st.rerun()
-    st.caption("Granska är ett sidospår. Rader här går inte till Export förrän du bockar i Klar och klickar på knappen.")
+    st.caption("Granska är ett sidospår. Redigera direkt i tabellen, markera rader med Välj och klicka Verkställ ändringar eller Exkludera valda.")
 
-with tab_ready:
+elif active_tab == "Klara":
     ready_df = working_df[ready_mask]
     st.dataframe(ready_df, use_container_width=True, hide_index=True, height=TABLE_HEIGHT)
 
-with tab_excluded:
+elif active_tab == "Exkluderade":
     excluded_df = working_df[excluded_mask]
     st.dataframe(excluded_df, use_container_width=True, hide_index=True, height=TABLE_HEIGHT)
     if not excluded_df.empty and st.button("Återställ alla exkluderade"):
         st.session_state.excluded_rows = set()
         st.rerun()
 
-with tab_export:
+elif active_tab == "Export":
     export_df = working_df[ready_mask]
     import_df = to_import_columns(export_df)
     import_df.insert(0, "Rad", export_df["Rad"].to_numpy())
+    import_df.insert(0, SELECT_COLUMN, False)
 
     duplicate_file = st.session_state.get("duplicate_file")
     duplicate_sheets = []
@@ -859,14 +1040,25 @@ with tab_export:
         height=TABLE_HEIGHT,
         num_rows="dynamic",
         key=f"export_editor_{st.session_state.export_editor_version}",
-        column_config={"Rad": None},
+        column_config={
+            SELECT_COLUMN: st.column_config.CheckboxColumn(SELECT_COLUMN, width="small"),
+            "Rad": None,
+        },
     )
     original_export_rows = set(import_df["Rad"].astype(int).tolist())
     edited_import_df, removed_export_rows = apply_export_edits(edited_import_df, original_export_rows)
     if removed_export_rows:
         st.session_state.export_editor_version += 1
         st.rerun()
-    export_output_df = edited_import_df.drop(columns=["Rad"], errors="ignore")
+    selected_export_rows = edited_import_df[edited_import_df[SELECT_COLUMN] == True]
+    if st.button("Exkludera valda", use_container_width=True):
+        if not selected_export_rows.empty:
+            st.session_state.excluded_rows.update(selected_export_rows["Rad"].dropna().astype(int).tolist())
+            st.session_state.export_editor_version += 1
+            st.rerun()
+        else:
+            st.warning("Markera minst en rad först.")
+    export_output_df = edited_import_df.drop(columns=["Rad", SELECT_COLUMN], errors="ignore")
 
     with st.expander("Dublettkontroll", expanded=False):
         st.caption("Valfritt sista steg. Ladda upp en befintlig lista om du vill markera matchningar på namn och/eller e-post.")
