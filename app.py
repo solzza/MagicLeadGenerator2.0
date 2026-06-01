@@ -199,6 +199,137 @@ st.markdown(
         border-radius: 8px !important;
     }
     }
+
+    .magic-loader {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        min-height: 96px;
+        margin: 0.75rem 0 1rem;
+        padding: 1rem 1.25rem;
+        border: 1px solid rgba(184, 138, 34, 0.28);
+        border-radius: 8px;
+        background: rgba(255, 250, 240, 0.72);
+        overflow: hidden;
+    }
+
+    .magic-loader-stage {
+        position: relative;
+        width: 128px;
+        height: 72px;
+        flex: 0 0 128px;
+    }
+
+    .magic-wizard {
+        position: absolute;
+        left: 8px;
+        bottom: 8px;
+        width: 42px;
+        height: 52px;
+        animation: wizard-hop 1.15s ease-in-out infinite;
+    }
+
+    .magic-wizard .hat {
+        position: absolute;
+        left: 8px;
+        top: 0;
+        width: 0;
+        height: 0;
+        border-left: 13px solid transparent;
+        border-right: 13px solid transparent;
+        border-bottom: 28px solid #2d6f73;
+        transform: rotate(-8deg);
+    }
+
+    .magic-wizard .face {
+        position: absolute;
+        left: 10px;
+        top: 23px;
+        width: 22px;
+        height: 18px;
+        border-radius: 50%;
+        background: #f0cda5;
+    }
+
+    .magic-wizard .robe {
+        position: absolute;
+        left: 5px;
+        bottom: 0;
+        width: 32px;
+        height: 30px;
+        border-radius: 8px 8px 4px 4px;
+        background: #1f4f52;
+    }
+
+    .magic-wizard .wand {
+        position: absolute;
+        left: 37px;
+        top: 22px;
+        width: 34px;
+        height: 3px;
+        border-radius: 999px;
+        background: #6f5011;
+        transform-origin: left center;
+        transform: rotate(-24deg);
+        animation: wand-flick 1.15s ease-in-out infinite;
+    }
+
+    .magic-spark {
+        position: absolute;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #d8be6a;
+        box-shadow: 0 0 10px rgba(216, 190, 106, 0.8);
+        opacity: 0;
+        animation: spark-pop 1.15s ease-out infinite;
+    }
+
+    .magic-spark.one {
+        left: 84px;
+        top: 14px;
+    }
+
+    .magic-spark.two {
+        left: 104px;
+        top: 30px;
+        animation-delay: 0.16s;
+    }
+
+    .magic-spark.three {
+        left: 91px;
+        top: 48px;
+        animation-delay: 0.28s;
+    }
+
+    .magic-loader-text strong {
+        display: block;
+        color: #182024;
+        font-weight: 760;
+        margin-bottom: 0.2rem;
+    }
+
+    .magic-loader-text span {
+        color: #63717a;
+        font-size: 0.94rem;
+    }
+
+    @keyframes wizard-hop {
+        0%, 100% { transform: translateX(0) translateY(0) rotate(-2deg); }
+        40% { transform: translateX(34px) translateY(-12px) rotate(4deg); }
+        70% { transform: translateX(58px) translateY(0) rotate(-3deg); }
+    }
+
+    @keyframes wand-flick {
+        0%, 100% { transform: rotate(-24deg); }
+        45% { transform: rotate(-42deg); }
+    }
+
+    @keyframes spark-pop {
+        0% { transform: scale(0.4); opacity: 0; }
+        35% { transform: scale(1); opacity: 1; }
+        100% { transform: translateX(22px) translateY(-12px) scale(0.2); opacity: 0; }
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -242,6 +373,32 @@ def reset_review_state() -> None:
     st.session_state.excluded_rows = set()
     st.session_state.review_mark_all = False
     st.session_state.review_editor_version = st.session_state.get("review_editor_version", 0) + 1
+    st.session_state.export_editor_version = st.session_state.get("export_editor_version", 0) + 1
+
+
+def render_magic_loader() -> None:
+    st.markdown(
+        """
+        <div class="magic-loader">
+            <div class="magic-loader-stage">
+                <div class="magic-wizard" aria-hidden="true">
+                    <div class="hat"></div>
+                    <div class="face"></div>
+                    <div class="robe"></div>
+                    <div class="wand"></div>
+                </div>
+                <div class="magic-spark one"></div>
+                <div class="magic-spark two"></div>
+                <div class="magic-spark three"></div>
+            </div>
+            <div class="magic-loader-text">
+                <strong>Bearbetar leads</strong>
+                <span>Matchar bolag, domäner och e-post innan raderna delas upp.</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def safe_history_filename(name: str) -> str:
@@ -317,6 +474,30 @@ def apply_review_edits(edited_review: pd.DataFrame, original_review_rows: set[in
             for column, value in values.items():
                 if column in saved_working_df.columns:
                     saved_working_df.at[row_index, column] = value
+    st.session_state.working_df = saved_working_df
+    return edited_not_removed, removed_rows
+
+
+def apply_export_edits(edited_export: pd.DataFrame, original_export_rows: set[int]) -> tuple[pd.DataFrame, set[int]]:
+    if "Rad" not in edited_export.columns:
+        return edited_export, set()
+
+    edited_export_rows = set(edited_export["Rad"].dropna().astype(int).tolist())
+    removed_rows = original_export_rows - edited_export_rows
+    for row_id in removed_rows:
+        st.session_state.excluded_rows.add(row_id)
+
+    edited_not_removed = edited_export[edited_export["Rad"].notna()].copy()
+    saved_working_df = st.session_state.working_df.copy()
+    for _, row in edited_not_removed.iterrows():
+        row_id = int(row["Rad"])
+        row_matches = saved_working_df.index[saved_working_df["Rad"] == row_id].tolist()
+        if not row_matches:
+            continue
+        row_index = row_matches[0]
+        for column, value in row.drop(labels=["Rad"], errors="ignore").items():
+            if column in saved_working_df.columns:
+                saved_working_df.at[row_index, column] = value
     st.session_state.working_df = saved_working_df
     return edited_not_removed, removed_rows
 
@@ -432,6 +613,8 @@ if "review_mark_all" not in st.session_state:
     st.session_state.review_mark_all = False
 if "review_editor_version" not in st.session_state:
     st.session_state.review_editor_version = 0
+if "export_editor_version" not in st.session_state:
+    st.session_state.export_editor_version = 0
 if "clean_input_key" not in st.session_state:
     st.session_state.clean_input_key = None
 if "working_df" not in st.session_state:
@@ -450,7 +633,12 @@ clean_input_key = (
     keywords,
 )
 if st.session_state.clean_input_key != clean_input_key:
-    cleaned_df = clean_leads(raw_df, registry_df, options).reset_index(drop=True)
+    loader = st.empty()
+    with loader.container():
+        render_magic_loader()
+    with st.spinner("Bearbetar leads..."):
+        cleaned_df = clean_leads(raw_df, registry_df, options).reset_index(drop=True)
+    loader.empty()
     cleaned_df.insert(0, "Rad", cleaned_df.index + 1)
     st.session_state.working_df = cleaned_df
     st.session_state.clean_input_key = clean_input_key
@@ -553,6 +741,7 @@ with tab_excluded:
 with tab_export:
     export_df = working_df[ready_mask]
     import_df = to_import_columns(export_df)
+    import_df.insert(0, "Rad", export_df["Rad"].to_numpy())
 
     duplicate_file = st.session_state.get("duplicate_file")
     duplicate_sheets = []
@@ -578,8 +767,16 @@ with tab_export:
         use_container_width=True,
         hide_index=True,
         height=TABLE_HEIGHT,
-        key="export_editor",
+        num_rows="dynamic",
+        key=f"export_editor_{st.session_state.export_editor_version}",
+        column_config={"Rad": None},
     )
+    original_export_rows = set(import_df["Rad"].astype(int).tolist())
+    edited_import_df, removed_export_rows = apply_export_edits(edited_import_df, original_export_rows)
+    if removed_export_rows:
+        st.session_state.export_editor_version += 1
+        st.rerun()
+    export_output_df = edited_import_df.drop(columns=["Rad"], errors="ignore")
 
     with st.expander("Dublettkontroll", expanded=False):
         st.caption("Valfritt sista steg. Ladda upp en befintlig lista om du vill markera matchningar på namn och/eller e-post.")
@@ -599,7 +796,7 @@ with tab_export:
                 key="duplicate_sheet",
             )
 
-    excel_bytes = dataframe_to_xlsx_bytes(edited_import_df)
+    excel_bytes = dataframe_to_xlsx_bytes(export_output_df)
     if st.button("Exportera till Excel", type="primary"):
         output_dir = Path.home() / "Downloads"
         output_dir.mkdir(exist_ok=True)
@@ -611,7 +808,7 @@ with tab_export:
                 "key": f"export:{output_path}",
                 "type": "Export",
                 "name": output_path.name,
-                "rows": len(edited_import_df),
+                "rows": len(export_output_df),
                 "sheet": "Upsales Import",
                 "path": str(output_path),
             }
@@ -619,7 +816,7 @@ with tab_export:
         st.success(f"Sparad: {output_path.resolve()}")
     st.download_button(
         "Ladda ner CSV",
-        data=edited_import_df.to_csv(index=False).encode("utf-8-sig"),
+        data=export_output_df.to_csv(index=False).encode("utf-8-sig"),
         file_name="upsales_import.csv",
         mime="text/csv",
     )
