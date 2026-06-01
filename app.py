@@ -215,90 +215,177 @@ st.markdown(
 
     .magic-loader-stage {
         position: relative;
-        width: 128px;
-        height: 72px;
-        flex: 0 0 128px;
+        width: 150px;
+        height: 88px;
+        flex: 0 0 150px;
     }
 
     .magic-wizard {
         position: absolute;
         left: 8px;
         bottom: 8px;
-        width: 42px;
-        height: 52px;
+        width: 56px;
+        height: 70px;
         animation: wizard-hop 1.15s ease-in-out infinite;
     }
 
     .magic-wizard .hat {
         position: absolute;
-        left: 8px;
+        left: 12px;
         top: 0;
         width: 0;
         height: 0;
-        border-left: 13px solid transparent;
-        border-right: 13px solid transparent;
-        border-bottom: 28px solid #2d6f73;
+        border-left: 15px solid transparent;
+        border-right: 15px solid transparent;
+        border-bottom: 36px solid #2d6f73;
+        filter: drop-shadow(0 2px 0 rgba(24, 32, 36, 0.22));
         transform: rotate(-8deg);
+        z-index: 3;
+    }
+
+    .magic-wizard .hat::after {
+        content: "";
+        position: absolute;
+        left: -8px;
+        top: 20px;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #d8be6a;
+        box-shadow: 0 0 8px rgba(216, 190, 106, 0.9);
+    }
+
+    .magic-wizard .brim {
+        position: absolute;
+        left: 7px;
+        top: 29px;
+        width: 42px;
+        height: 9px;
+        border-radius: 999px;
+        background: #1f4f52;
+        box-shadow: 0 2px 0 rgba(24, 32, 36, 0.18);
+        z-index: 4;
     }
 
     .magic-wizard .face {
         position: absolute;
-        left: 10px;
-        top: 23px;
-        width: 22px;
-        height: 18px;
+        left: 15px;
+        top: 34px;
+        width: 26px;
+        height: 22px;
         border-radius: 50%;
         background: #f0cda5;
+        z-index: 2;
+    }
+
+    .magic-wizard .face::before,
+    .magic-wizard .face::after {
+        content: "";
+        position: absolute;
+        top: 8px;
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: #182024;
+    }
+
+    .magic-wizard .face::before {
+        left: 8px;
+    }
+
+    .magic-wizard .face::after {
+        right: 8px;
+    }
+
+    .magic-wizard .beard {
+        position: absolute;
+        left: 12px;
+        top: 48px;
+        width: 32px;
+        height: 23px;
+        border-radius: 45% 45% 60% 60%;
+        background: #f6f2e8;
+        box-shadow: inset 0 -4px 0 rgba(216, 190, 106, 0.22);
+        z-index: 1;
     }
 
     .magic-wizard .robe {
         position: absolute;
-        left: 5px;
+        left: 7px;
         bottom: 0;
-        width: 32px;
-        height: 30px;
-        border-radius: 8px 8px 4px 4px;
+        width: 42px;
+        height: 34px;
+        border-radius: 10px 10px 5px 5px;
         background: #1f4f52;
+        box-shadow: inset 10px 0 0 rgba(45, 111, 115, 0.9);
+    }
+
+    .magic-wizard .sleeve {
+        position: absolute;
+        left: 39px;
+        top: 48px;
+        width: 24px;
+        height: 12px;
+        border-radius: 999px;
+        background: #2d6f73;
+        transform: rotate(-24deg);
+        z-index: 2;
     }
 
     .magic-wizard .wand {
         position: absolute;
-        left: 37px;
-        top: 22px;
-        width: 34px;
+        left: 56px;
+        top: 42px;
+        width: 42px;
         height: 3px;
         border-radius: 999px;
         background: #6f5011;
         transform-origin: left center;
-        transform: rotate(-24deg);
+        transform: rotate(-30deg);
         animation: wand-flick 1.15s ease-in-out infinite;
+        z-index: 4;
+    }
+
+    .magic-wizard .wand::after {
+        content: "";
+        position: absolute;
+        right: -3px;
+        top: -3px;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #fff4a3;
+        box-shadow: 0 0 12px #d8be6a, 0 0 20px rgba(45, 111, 115, 0.55);
     }
 
     .magic-spark {
         position: absolute;
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        background: #d8be6a;
-        box-shadow: 0 0 10px rgba(216, 190, 106, 0.8);
+        width: 16px;
+        height: 16px;
+        background: #ffd34f;
+        clip-path: polygon(50% 0%, 62% 34%, 98% 35%, 69% 55%, 79% 91%, 50% 70%, 21% 91%, 31% 55%, 2% 35%, 38% 34%);
+        filter:
+            drop-shadow(0 0 2px #5f430b)
+            drop-shadow(0 0 8px rgba(255, 211, 79, 0.95))
+            drop-shadow(0 0 14px rgba(45, 111, 115, 0.5));
         opacity: 0;
         animation: spark-pop 1.15s ease-out infinite;
     }
 
     .magic-spark.one {
-        left: 84px;
-        top: 14px;
+        left: 104px;
+        top: 12px;
     }
 
     .magic-spark.two {
-        left: 104px;
-        top: 30px;
+        left: 126px;
+        top: 34px;
         animation-delay: 0.16s;
     }
 
     .magic-spark.three {
-        left: 91px;
-        top: 48px;
+        left: 106px;
+        top: 58px;
         animation-delay: 0.28s;
     }
 
@@ -316,13 +403,13 @@ st.markdown(
 
     @keyframes wizard-hop {
         0%, 100% { transform: translateX(0) translateY(0) rotate(-2deg); }
-        40% { transform: translateX(34px) translateY(-12px) rotate(4deg); }
-        70% { transform: translateX(58px) translateY(0) rotate(-3deg); }
+        40% { transform: translateX(28px) translateY(-12px) rotate(4deg); }
+        70% { transform: translateX(48px) translateY(0) rotate(-3deg); }
     }
 
     @keyframes wand-flick {
-        0%, 100% { transform: rotate(-24deg); }
-        45% { transform: rotate(-42deg); }
+        0%, 100% { transform: rotate(-30deg); }
+        45% { transform: rotate(-48deg); }
     }
 
     @keyframes spark-pop {
@@ -383,8 +470,11 @@ def render_magic_loader() -> None:
             <div class="magic-loader-stage">
                 <div class="magic-wizard" aria-hidden="true">
                     <div class="hat"></div>
+                    <div class="brim"></div>
                     <div class="face"></div>
+                    <div class="beard"></div>
                     <div class="robe"></div>
+                    <div class="sleeve"></div>
                     <div class="wand"></div>
                 </div>
                 <div class="magic-spark one"></div>
