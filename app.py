@@ -235,6 +235,7 @@ def reset_review_state() -> None:
     st.session_state.reviewed_rows = set()
     st.session_state.excluded_rows = set()
     st.session_state.review_mark_all = False
+    st.session_state.review_editor_version = st.session_state.get("review_editor_version", 0) + 1
 
 
 def safe_history_filename(name: str) -> str:
@@ -290,6 +291,28 @@ def highlight_duplicate_rows(row: pd.Series) -> list[str]:
         "background-color: rgba(255, 214, 102, 0.18)"
         for _ in row
     ]
+
+
+def apply_review_edits(edited_review: pd.DataFrame, original_review_rows: set[int]) -> tuple[pd.DataFrame, set[int]]:
+    edited_review_rows = set(edited_review["Rad"].dropna().astype(int).tolist()) if "Rad" in edited_review.columns else set()
+    removed_rows = original_review_rows - edited_review_rows
+
+    for row_id in removed_rows:
+        st.session_state.excluded_rows.add(row_id)
+
+    edited_not_removed = edited_review[edited_review["Rad"].notna()] if "Rad" in edited_review.columns else edited_review
+    saved_working_df = st.session_state.working_df.copy()
+    for _, row in edited_not_removed.iterrows():
+        row_id = int(row["Rad"])
+        values = row.drop(labels=["Klar"], errors="ignore").to_dict()
+        row_matches = saved_working_df.index[saved_working_df["Rad"] == row_id].tolist()
+        if row_matches:
+            row_index = row_matches[0]
+            for column, value in values.items():
+                if column in saved_working_df.columns:
+                    saved_working_df.at[row_index, column] = value
+    st.session_state.working_df = saved_working_df
+    return edited_not_removed, removed_rows
 
 
 st.title("Magic Leads Generator")
@@ -401,6 +424,8 @@ if "excluded_rows" not in st.session_state:
     st.session_state.excluded_rows = set()
 if "review_mark_all" not in st.session_state:
     st.session_state.review_mark_all = False
+if "review_editor_version" not in st.session_state:
+    st.session_state.review_editor_version = 0
 if "clean_input_key" not in st.session_state:
     st.session_state.clean_input_key = None
 if "working_df" not in st.session_state:
@@ -463,58 +488,46 @@ with tab_all:
 with tab_review:
     review_df = working_df[review_mask].copy()
     review_df.insert(0, "Klar", False)
-    with st.form("review_form"):
+    if st.session_state.review_mark_all:
+        st.info("Bulkmarkering är aktiv: alla kvarvarande rader i Granska markeras som klara när du klickar Markera valda.")
+    edited_review = st.data_editor(
+        review_df,
+        use_container_width=True,
+        hide_index=True,
+        height=TABLE_HEIGHT,
+        num_rows="dynamic",
+        key=f"review_editor_{st.session_state.review_editor_version}",
+    )
+    original_review_rows = set(review_df["Rad"].astype(int).tolist())
+    edited_not_removed, removed_rows = apply_review_edits(edited_review, original_review_rows)
+    if removed_rows:
+        st.session_state.review_editor_version += 1
+        st.rerun()
+
+    review_button_cols = st.columns([1.35, 1.35, 1.35, 1.95])
+    with review_button_cols[0]:
+        submitted_review = st.button("Markera valda", type="primary", use_container_width=True)
+    with review_button_cols[1]:
+        submitted_mark_all = st.button("Markera alla", use_container_width=True)
+    with review_button_cols[2]:
+        submitted_clear_all = st.button("Avmarkera alla", use_container_width=True)
+
+    if submitted_review:
         if st.session_state.review_mark_all:
-            st.info("Bulkmarkering är aktiv: alla kvarvarande rader i Granska markeras som klara när du klickar Markera valda.")
-        edited_review = st.data_editor(
-            review_df,
-            use_container_width=True,
-            hide_index=True,
-            height=TABLE_HEIGHT,
-            num_rows="dynamic",
-            key="review_editor",
-        )
-        review_button_cols = st.columns([1.35, 1.35, 1.35, 1.95])
-        with review_button_cols[0]:
-            submitted_review = st.form_submit_button("Markera valda", type="primary", use_container_width=True)
-        with review_button_cols[1]:
-            submitted_mark_all = st.form_submit_button("Markera alla", use_container_width=True)
-        with review_button_cols[2]:
-            submitted_clear_all = st.form_submit_button("Avmarkera alla", use_container_width=True)
-    if submitted_review or submitted_mark_all or submitted_clear_all:
-        original_review_rows = set(review_df["Rad"].astype(int).tolist())
-        edited_review_rows = set(edited_review["Rad"].astype(int).tolist()) if "Rad" in edited_review.columns else set()
-        removed_rows = original_review_rows - edited_review_rows
-
-        for row_id in removed_rows:
-            st.session_state.excluded_rows.add(row_id)
-
-        edited_not_removed = edited_review[edited_review["Rad"].notna()] if "Rad" in edited_review.columns else edited_review
-        saved_working_df = st.session_state.working_df.copy()
-        for _, row in edited_not_removed.iterrows():
+            selected = edited_not_removed
+        else:
+            selected = edited_not_removed[edited_not_removed["Klar"] == True]
+        for _, row in selected.iterrows():
             row_id = int(row["Rad"])
-            values = row.drop(labels=["Klar"], errors="ignore").to_dict()
-            row_matches = saved_working_df.index[saved_working_df["Rad"] == row_id].tolist()
-            if row_matches:
-                row_index = row_matches[0]
-                for column, value in values.items():
-                    if column in saved_working_df.columns:
-                        saved_working_df.at[row_index, column] = value
-        st.session_state.working_df = saved_working_df
-
-        if submitted_review:
-            if st.session_state.review_mark_all:
-                selected = edited_not_removed
-            else:
-                selected = edited_not_removed[edited_not_removed["Klar"] == True]
-            for _, row in selected.iterrows():
-                row_id = int(row["Rad"])
-                st.session_state.reviewed_rows.add(row_id)
-            st.session_state.review_mark_all = False
-        elif submitted_mark_all:
-            st.session_state.review_mark_all = True
-        elif submitted_clear_all:
-            st.session_state.review_mark_all = False
+            st.session_state.reviewed_rows.add(row_id)
+        st.session_state.review_mark_all = False
+        st.session_state.review_editor_version += 1
+        st.rerun()
+    if submitted_mark_all:
+        st.session_state.review_mark_all = True
+        st.rerun()
+    if submitted_clear_all:
+        st.session_state.review_mark_all = False
         st.rerun()
     st.caption("Granska är ett sidospår. Rader här går inte till Export förrän du bockar i Klar och klickar på knappen.")
 
@@ -552,11 +565,12 @@ with tab_export:
         except Exception as exc:
             st.error(f"Kunde inte köra dublettkontroll: {exc}")
 
-    st.dataframe(
-        import_df.style.apply(highlight_duplicate_rows, axis=1),
+    edited_import_df = st.data_editor(
+        import_df,
         use_container_width=True,
         hide_index=True,
         height=TABLE_HEIGHT,
+        key="export_editor",
     )
 
     with st.expander("Dublettkontroll", expanded=False):
@@ -577,7 +591,7 @@ with tab_export:
                 key="duplicate_sheet",
             )
 
-    excel_bytes = dataframe_to_xlsx_bytes(import_df)
+    excel_bytes = dataframe_to_xlsx_bytes(edited_import_df)
     if st.button("Exportera till Excel", type="primary"):
         output_dir = Path.home() / "Downloads"
         output_dir.mkdir(exist_ok=True)
@@ -589,7 +603,7 @@ with tab_export:
                 "key": f"export:{output_path}",
                 "type": "Export",
                 "name": output_path.name,
-                "rows": len(import_df),
+                "rows": len(edited_import_df),
                 "sheet": "Upsales Import",
                 "path": str(output_path),
             }
@@ -597,7 +611,7 @@ with tab_export:
         st.success(f"Sparad: {output_path.resolve()}")
     st.download_button(
         "Ladda ner CSV",
-        data=import_df.to_csv(index=False).encode("utf-8-sig"),
+        data=edited_import_df.to_csv(index=False).encode("utf-8-sig"),
         file_name="upsales_import.csv",
         mime="text/csv",
     )
