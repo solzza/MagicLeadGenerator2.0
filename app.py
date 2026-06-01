@@ -147,7 +147,13 @@ st.markdown(
         background: #ffffff;
         color: var(--mlg-ink);
         font-weight: 700;
+        white-space: nowrap;
         box-shadow: 0 4px 12px rgba(24, 32, 36, 0.05);
+    }
+
+    .stButton > button p,
+    .stDownloadButton > button p {
+        white-space: nowrap;
     }
 
     .stButton > button:hover,
@@ -489,7 +495,7 @@ with tab_review:
     review_df = working_df[review_mask].copy()
     review_df.insert(0, "Klar", False)
     if st.session_state.review_mark_all:
-        st.info("Bulkmarkering är aktiv: alla kvarvarande rader i Granska markeras som klara när du klickar Bekräfta markerade rader som klara.")
+        st.info("Bulkmarkering är aktiv: alla kvarvarande rader i Granska markeras som klara när du klickar Verkställ ändringar.")
     edited_review = st.data_editor(
         review_df,
         use_container_width=True,
@@ -504,9 +510,9 @@ with tab_review:
         st.session_state.review_editor_version += 1
         st.rerun()
 
-    review_button_cols = st.columns([1.35, 1.35, 1.35, 1.95])
+    review_button_cols = st.columns([1.8, 1.35, 1.35, 1.5])
     with review_button_cols[0]:
-        submitted_review = st.button("Bekräfta markerade rader som klara", type="primary", use_container_width=True)
+        submitted_review = st.button("Verkställ ändringar", type="primary", use_container_width=True)
     with review_button_cols[1]:
         submitted_mark_all = st.button("Markera alla", use_container_width=True)
     with review_button_cols[2]:
