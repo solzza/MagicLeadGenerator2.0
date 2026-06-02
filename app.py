@@ -467,6 +467,102 @@ st.markdown(
     }
     }
 
+    :root {
+        --mlg-forced-bg: #0e1117;
+        --mlg-forced-panel: #161b22;
+        --mlg-forced-panel-soft: #1b222c;
+        --mlg-forced-ink: #fafafa;
+        --mlg-forced-muted: #a3aab7;
+        --mlg-forced-line: #30363d;
+        --mlg-forced-accent: #d8be6a;
+        --mlg-forced-teal: #5db9bd;
+    }
+
+    .stApp {
+        background: var(--mlg-forced-bg) !important;
+        color: var(--mlg-forced-ink) !important;
+    }
+
+    h1,
+    h2,
+    h3,
+    label,
+    p,
+    span,
+    small,
+    [data-testid="stMarkdownContainer"] {
+        color: var(--mlg-forced-ink) !important;
+    }
+
+    section[data-testid="stSidebar"] {
+        background: #11161d !important;
+        border-right: 1px solid var(--mlg-forced-line) !important;
+    }
+
+    section[data-testid="stSidebar"],
+    section[data-testid="stSidebar"] * {
+        color: var(--mlg-forced-ink) !important;
+    }
+
+    section[data-testid="stSidebar"] [data-testid="stCaptionContainer"],
+    section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInstructions"],
+    section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInstructions"] * {
+        color: var(--mlg-forced-muted) !important;
+    }
+
+    div[data-testid="stFileUploader"],
+    div[data-testid="stFileUploaderDropzone"] {
+        background: var(--mlg-forced-panel) !important;
+        border-color: var(--mlg-forced-line) !important;
+    }
+
+    div[data-testid="stFileUploaderDropzone"] button,
+    .stButton > button,
+    .stDownloadButton > button {
+        background: var(--mlg-forced-panel-soft) !important;
+        border: 1px solid var(--mlg-forced-line) !important;
+        color: var(--mlg-forced-ink) !important;
+    }
+
+    .stButton > button:hover,
+    .stDownloadButton > button:hover {
+        border-color: var(--mlg-forced-accent) !important;
+        color: #fff7cf !important;
+        background: #202733 !important;
+    }
+
+    button[kind="primary"] {
+        border-color: var(--mlg-forced-teal) !important;
+        background: #2d6f73 !important;
+        color: #ffffff !important;
+    }
+
+    div[data-testid="stMetric"],
+    div[data-testid="stExpander"] {
+        background: var(--mlg-forced-panel) !important;
+        border-color: var(--mlg-forced-line) !important;
+    }
+
+    div[data-testid="stDataFrame"],
+    div[data-testid="stDataEditor"] {
+        border: 1px solid var(--mlg-forced-line) !important;
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.28) !important;
+    }
+
+    [data-baseweb="input"],
+    [data-baseweb="textarea"],
+    textarea,
+    input {
+        background: var(--mlg-forced-panel) !important;
+        border-color: var(--mlg-forced-line) !important;
+        color: var(--mlg-forced-ink) !important;
+    }
+
+    textarea::placeholder,
+    input::placeholder {
+        color: var(--mlg-forced-muted) !important;
+    }
+
     .magic-loader {
         display: flex;
         align-items: center;
