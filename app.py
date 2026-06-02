@@ -837,6 +837,32 @@ st.markdown(
         color: #fafafa !important;
     }
 
+    section[data-testid="stSidebar"] .stFileUploader,
+    section[data-testid="stSidebar"] div.stFileUploader[data-testid="stFileUploader"] {
+        background-color: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+
+    section[data-testid="stSidebar"] .stFileUploader > label,
+    section[data-testid="stSidebar"] div.stFileUploader[data-testid="stFileUploader"] > label,
+    section[data-testid="stSidebar"] .stFileUploader [data-testid="stWidgetLabel"] {
+        background-color: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        color: #fafafa !important;
+        padding: 0 0 0.35rem 0 !important;
+    }
+
+    section[data-testid="stSidebar"] .stFileUploader [data-testid="stFileUploaderDropzone"],
+    section[data-testid="stSidebar"] div.stFileUploader[data-testid="stFileUploader"] [data-testid="stFileUploaderDropzone"] {
+        background-color: #161b22 !important;
+        border: 1px solid #30363d !important;
+        border-radius: 8px !important;
+        box-shadow: none !important;
+    }
+
     section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] button,
     section[data-testid="stSidebar"] button {
         background-color: #1b222c !important;
