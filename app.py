@@ -953,6 +953,8 @@ def reset_review_state() -> None:
     st.session_state.reviewed_rows = set()
     st.session_state.excluded_rows = set()
     st.session_state.review_mark_all = False
+    st.session_state.export_output_df = pd.DataFrame()
+    st.session_state.export_data_key = None
     st.session_state.review_editor_version = st.session_state.get("review_editor_version", 0) + 1
     st.session_state.export_editor_version = st.session_state.get("export_editor_version", 0) + 1
 
@@ -1205,6 +1207,10 @@ if "clean_input_key" not in st.session_state:
     st.session_state.clean_input_key = None
 if "working_df" not in st.session_state:
     st.session_state.working_df = pd.DataFrame()
+if "export_output_df" not in st.session_state:
+    st.session_state.export_output_df = pd.DataFrame()
+if "export_data_key" not in st.session_state:
+    st.session_state.export_data_key = None
 
 registry_key = (
     str(DOMAIN_REGISTRY_PATH.resolve()) if DOMAIN_REGISTRY_PATH.exists()
@@ -1275,34 +1281,37 @@ elif active_tab == "Granska":
     review_df.insert(0, SELECT_COLUMN, st.session_state.review_mark_all)
     if st.session_state.review_mark_all:
         st.info("Bulkmarkering är aktiv: alla kvarvarande rader i Granska är markerade tills du avmarkerar.")
-    edited_review = st.data_editor(
-        review_df,
-        use_container_width=True,
-        hide_index=True,
-        height=TABLE_HEIGHT,
-        num_rows="dynamic",
-        key=f"review_editor_{st.session_state.review_editor_version}",
-        column_config={
-            SELECT_COLUMN: st.column_config.CheckboxColumn(SELECT_COLUMN, width="small"),
-            "Rad": None,
-        },
-    )
-    original_review_rows = set(review_df["Rad"].astype(int).tolist())
-    edited_not_removed, removed_rows = apply_review_edits(edited_review, original_review_rows)
-    if removed_rows:
-        st.session_state.review_editor_version += 1
-        st.rerun()
-    selected_review_rows = edited_not_removed[edited_not_removed[SELECT_COLUMN] == True]
+    with st.form(f"review_form_{st.session_state.review_editor_version}"):
+        edited_review = st.data_editor(
+            review_df,
+            use_container_width=True,
+            hide_index=True,
+            height=TABLE_HEIGHT,
+            num_rows="dynamic",
+            key=f"review_editor_{st.session_state.review_editor_version}",
+            column_config={
+                SELECT_COLUMN: st.column_config.CheckboxColumn(SELECT_COLUMN, width="small"),
+                "Rad": None,
+            },
+        )
+        review_button_cols = st.columns([1.8, 1.35, 1.35, 1.5])
+        with review_button_cols[0]:
+            submitted_review = st.form_submit_button("Verkställ ändringar", type="primary", use_container_width=True)
+        with review_button_cols[1]:
+            submitted_exclude = st.form_submit_button("Exkludera valda", use_container_width=True)
+        with review_button_cols[2]:
+            submitted_mark_all = st.form_submit_button("Markera alla", use_container_width=True)
+        with review_button_cols[3]:
+            submitted_clear_all = st.form_submit_button("Avmarkera alla", use_container_width=True)
 
-    review_button_cols = st.columns([1.8, 1.35, 1.35, 1.5])
-    with review_button_cols[0]:
-        submitted_review = st.button("Verkställ ändringar", type="primary", use_container_width=True)
-    with review_button_cols[1]:
-        submitted_exclude = st.button("Exkludera valda", use_container_width=True)
-    with review_button_cols[2]:
-        submitted_mark_all = st.button("Markera alla", use_container_width=True)
-    with review_button_cols[3]:
-        submitted_clear_all = st.button("Avmarkera alla", use_container_width=True)
+    selected_review_rows = pd.DataFrame()
+    if submitted_review or submitted_exclude:
+        original_review_rows = set(review_df["Rad"].astype(int).tolist())
+        edited_not_removed, removed_rows = apply_review_edits(edited_review, original_review_rows)
+        if removed_rows:
+            st.session_state.review_editor_version += 1
+            st.rerun()
+        selected_review_rows = edited_not_removed[edited_not_removed[SELECT_COLUMN] == True]
 
     if submitted_review:
         if selected_review_rows.empty:
@@ -1368,32 +1377,55 @@ elif active_tab == "Export":
         except Exception as exc:
             st.error(f"Kunde inte köra dublettkontroll: {exc}")
 
-    edited_import_df = st.data_editor(
-        import_df,
-        use_container_width=True,
-        hide_index=True,
-        height=TABLE_HEIGHT,
-        num_rows="dynamic",
-        key=f"export_editor_{st.session_state.export_editor_version}",
-        column_config={
-            SELECT_COLUMN: st.column_config.CheckboxColumn(SELECT_COLUMN, width="small"),
-            "Rad": None,
-        },
+    export_data_key = (
+        tuple(import_df["Rad"].dropna().astype(int).tolist()),
+        tuple(import_df.get("Duplicate Match", pd.Series("", index=import_df.index)).fillna("").astype(str).tolist()),
+        tuple(import_df.get("Issues", pd.Series("", index=import_df.index)).fillna("").astype(str).tolist()),
     )
-    original_export_rows = set(import_df["Rad"].astype(int).tolist())
-    edited_import_df, removed_export_rows = apply_export_edits(edited_import_df, original_export_rows)
-    if removed_export_rows:
-        st.session_state.export_editor_version += 1
-        st.rerun()
-    selected_export_rows = edited_import_df[edited_import_df[SELECT_COLUMN] == True]
-    if st.button("Exkludera valda", use_container_width=True):
-        if not selected_export_rows.empty:
-            st.session_state.excluded_rows.update(selected_export_rows["Rad"].dropna().astype(int).tolist())
+
+    with st.form(f"export_form_{st.session_state.export_editor_version}"):
+        edited_import_df = st.data_editor(
+            import_df,
+            use_container_width=True,
+            hide_index=True,
+            height=TABLE_HEIGHT,
+            num_rows="dynamic",
+            key=f"export_editor_{st.session_state.export_editor_version}",
+            column_config={
+                SELECT_COLUMN: st.column_config.CheckboxColumn(SELECT_COLUMN, width="small"),
+                "Rad": None,
+            },
+        )
+        export_button_cols = st.columns([1.8, 1.35, 2.85])
+        with export_button_cols[0]:
+            submitted_export = st.form_submit_button("Verkställ ändringar", type="primary", use_container_width=True)
+        with export_button_cols[1]:
+            submitted_export_exclude = st.form_submit_button("Exkludera valda", use_container_width=True)
+
+    if submitted_export or submitted_export_exclude:
+        original_export_rows = set(import_df["Rad"].astype(int).tolist())
+        edited_import_df, removed_export_rows = apply_export_edits(edited_import_df, original_export_rows)
+        if removed_export_rows:
             st.session_state.export_editor_version += 1
             st.rerun()
-        else:
-            st.warning("Markera minst en rad först.")
-    export_output_df = edited_import_df.drop(columns=["Rad", SELECT_COLUMN], errors="ignore")
+        selected_export_rows = edited_import_df[edited_import_df[SELECT_COLUMN] == True]
+        st.session_state.export_output_df = edited_import_df.drop(columns=["Rad", SELECT_COLUMN], errors="ignore")
+        st.session_state.export_data_key = export_data_key
+
+        if submitted_export_exclude:
+            if not selected_export_rows.empty:
+                st.session_state.excluded_rows.update(selected_export_rows["Rad"].dropna().astype(int).tolist())
+                st.session_state.export_editor_version += 1
+                st.rerun()
+            else:
+                st.warning("Markera minst en rad först.")
+        elif submitted_export:
+            st.success("Ändringarna är verkställda.")
+    elif st.session_state.export_data_key != export_data_key:
+        st.session_state.export_output_df = import_df.drop(columns=["Rad", SELECT_COLUMN], errors="ignore")
+        st.session_state.export_data_key = export_data_key
+
+    export_output_df = st.session_state.export_output_df
 
     with st.expander("Dublettkontroll", expanded=False):
         st.caption("Valfritt sista steg. Ladda upp en befintlig lista om du vill markera matchningar på namn och/eller e-post.")
