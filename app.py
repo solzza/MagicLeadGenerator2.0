@@ -1376,16 +1376,6 @@ elif active_tab == "Export":
         except Exception as exc:
             st.error(f"Kunde inte köra dublettkontroll: {exc}")
 
-    if duplicate_count:
-        highlighted_export_df = import_df.drop(columns=[SELECT_COLUMN, "Rad"], errors="ignore")
-        st.dataframe(
-            highlighted_export_df.style.apply(highlight_duplicate_rows, axis=1),
-            use_container_width=True,
-            hide_index=True,
-            height=min(TABLE_HEIGHT, 360),
-        )
-        st.caption("Gulmarkerade rader är potentiella dubletter. Redigera exportdatan i tabellen nedan.")
-
     export_data_key = (
         tuple(import_df["Rad"].dropna().astype(int).tolist()),
         tuple(import_df.get("Duplicate Match", pd.Series("", index=import_df.index)).fillna("").astype(str).tolist()),
