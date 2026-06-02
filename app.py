@@ -780,6 +780,101 @@ st.markdown(
         35% { transform: scale(1); opacity: 1; }
         100% { transform: translateX(22px) translateY(-12px) scale(0.2); opacity: 0; }
     }
+
+    html,
+    body,
+    .stApp,
+    [data-testid="stAppViewContainer"],
+    [data-testid="stHeader"],
+    [data-testid="stToolbar"],
+    [data-testid="stDecoration"] {
+        background-color: #0e1117 !important;
+        color: #fafafa !important;
+    }
+
+    section[data-testid="stSidebar"],
+    section[data-testid="stSidebar"] > div,
+    section[data-testid="stSidebar"] [data-testid="stSidebarContent"] {
+        background-color: #11161d !important;
+        color: #fafafa !important;
+    }
+
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3,
+    section[data-testid="stSidebar"] label,
+    section[data-testid="stSidebar"] p,
+    section[data-testid="stSidebar"] span,
+    section[data-testid="stSidebar"] small,
+    section[data-testid="stSidebar"] div {
+        color: #fafafa !important;
+    }
+
+    section[data-testid="stSidebar"] [data-testid="stCaptionContainer"],
+    section[data-testid="stSidebar"] [data-testid="stCaptionContainer"] *,
+    section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInstructions"],
+    section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzoneInstructions"] * {
+        color: #a3aab7 !important;
+    }
+
+    section[data-testid="stSidebar"] [data-testid="stFileUploader"],
+    section[data-testid="stSidebar"] [data-testid="stFileUploader"] > div,
+    section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"],
+    section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] > div,
+    section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] section {
+        background-color: #161b22 !important;
+        border-color: #30363d !important;
+        color: #fafafa !important;
+    }
+
+    section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] button,
+    section[data-testid="stSidebar"] button {
+        background-color: #1b222c !important;
+        border-color: #30363d !important;
+        color: #fafafa !important;
+    }
+
+    section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] svg,
+    section[data-testid="stSidebar"] button svg {
+        color: #fafafa !important;
+        fill: #fafafa !important;
+    }
+
+    section[data-testid="stSidebar"] [data-testid="stTextArea"],
+    section[data-testid="stSidebar"] [data-testid="stTextArea"] > div,
+    section[data-testid="stSidebar"] [data-testid="stTextAreaRootElement"],
+    section[data-testid="stSidebar"] [data-baseweb="textarea"],
+    section[data-testid="stSidebar"] [data-baseweb="textarea"] > div,
+    section[data-testid="stSidebar"] textarea,
+    section[data-testid="stSidebar"] [role="textbox"] {
+        background-color: #161b22 !important;
+        border-color: #30363d !important;
+        color: #fafafa !important;
+        caret-color: #fafafa !important;
+    }
+
+    section[data-testid="stSidebar"] textarea::placeholder,
+    section[data-testid="stSidebar"] input::placeholder {
+        color: #a3aab7 !important;
+    }
+
+    section[data-testid="stSidebar"] [data-baseweb="slider"] div,
+    section[data-testid="stSidebar"] [data-baseweb="slider"] span {
+        color: #5db9bd !important;
+    }
+
+    .magic-loader {
+        background: rgba(22, 27, 34, 0.82) !important;
+        border-color: rgba(216, 190, 106, 0.34) !important;
+    }
+
+    .magic-loader-text strong {
+        color: #fafafa !important;
+    }
+
+    .magic-loader-text span {
+        color: #a3aab7 !important;
+    }
     </style>
     """,
     unsafe_allow_html=True,
