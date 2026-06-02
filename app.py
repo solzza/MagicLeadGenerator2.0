@@ -817,8 +817,18 @@ st.markdown(
         color: #a3aab7 !important;
     }
 
+    section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] > div:has([data-testid="stFileUploader"]),
+    section[data-testid="stSidebar"] [data-testid="stElementContainer"]:has([data-testid="stFileUploader"]),
+    section[data-testid="stSidebar"] div:has(> [data-testid="stFileUploader"]) {
+        background-color: transparent !important;
+        border-color: transparent !important;
+        box-shadow: none !important;
+    }
+
     section[data-testid="stSidebar"] [data-testid="stFileUploader"],
     section[data-testid="stSidebar"] [data-testid="stFileUploader"] > div,
+    section[data-testid="stSidebar"] [data-testid="stFileUploader"] > section,
+    section[data-testid="stSidebar"] [data-testid="stFileUploader"] label,
     section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"],
     section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] > div,
     section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] section {
