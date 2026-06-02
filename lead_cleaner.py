@@ -745,8 +745,7 @@ def dataframe_to_xlsx_bytes(df: pd.DataFrame) -> bytes:
         header_fill = PatternFill("solid", fgColor="1F2428")
         header_font = Font(bold=True, size=16, color="D8BE6A")
         body_font = Font(size=12, color="111111")
-        duplicate_fill = PatternFill("solid", fgColor="FFF8E1")
-        duplicate_side = Side(style="medium", color="C08A00")
+        duplicate_fill = PatternFill("solid", fgColor="FFE680")
         medium_black = Side(style="medium", color="000000")
 
         ws.row_dimensions[1].height = 36
@@ -766,29 +765,15 @@ def dataframe_to_xlsx_bytes(df: pd.DataFrame) -> bytes:
             if cell.value == "Duplicate Match":
                 duplicate_col = cell.column
 
-        duplicate_rows = {}
-        for row_number in range(2, ws.max_row + 1):
-            duplicate_value = ws.cell(row=row_number, column=duplicate_col).value if duplicate_col else ""
-            duplicate_rows[row_number] = has_duplicate_match(duplicate_value)
-
         for row in ws.iter_rows(min_row=2):
             duplicate_value = ws.cell(row=row[0].row, column=duplicate_col).value if duplicate_col else ""
-            row_number = row[0].row
-            is_duplicate = duplicate_rows[row_number]
-            previous_duplicate = duplicate_rows.get(row_number - 1, False)
-            next_duplicate = duplicate_rows.get(row_number + 1, False)
+            is_duplicate = has_duplicate_match(duplicate_value)
             for cell in row:
                 if is_duplicate:
                     cell.fill = duplicate_fill
                 cell.font = body_font
                 cell.alignment = Alignment(horizontal="left", vertical="top")
-                if is_duplicate:
-                    cell.border = Border(
-                        top=duplicate_side if not previous_duplicate else None,
-                        bottom=duplicate_side if not next_duplicate else None,
-                    )
-                else:
-                    cell.border = Border()
+                cell.border = Border()
 
         for column_cells in ws.columns:
             max_len = max(len(str(cell.value or "")) for cell in column_cells)

@@ -1034,10 +1034,8 @@ def highlight_duplicate_rows(row: pd.Series) -> list[str]:
     if not has_duplicate_match(row.get("Duplicate Match", "")):
         return ["" for _ in row]
     return [
-        "border-top: 2px solid #c08a00; "
-        "border-bottom: 2px solid #c08a00; "
-        "box-shadow: inset 0 0 8px rgba(192, 138, 0, 0.45); "
-        "background-color: rgba(255, 214, 102, 0.18)"
+        "background-color: rgba(255, 205, 45, 0.42); "
+        "color: #fafafa"
         for _ in row
     ]
 
@@ -1360,6 +1358,7 @@ elif active_tab == "Export":
 
     duplicate_file = st.session_state.get("duplicate_file")
     duplicate_sheets = []
+    duplicate_count = 0
     if duplicate_file is not None:
         try:
             duplicate_sheets = available_sheets(duplicate_file)
@@ -1377,6 +1376,16 @@ elif active_tab == "Export":
         except Exception as exc:
             st.error(f"Kunde inte köra dublettkontroll: {exc}")
 
+    if duplicate_count:
+        highlighted_export_df = import_df.drop(columns=[SELECT_COLUMN, "Rad"], errors="ignore")
+        st.dataframe(
+            highlighted_export_df.style.apply(highlight_duplicate_rows, axis=1),
+            use_container_width=True,
+            hide_index=True,
+            height=min(TABLE_HEIGHT, 360),
+        )
+        st.caption("Gulmarkerade rader är potentiella dubletter. Redigera exportdatan i tabellen nedan.")
+
     export_data_key = (
         tuple(import_df["Rad"].dropna().astype(int).tolist()),
         tuple(import_df.get("Duplicate Match", pd.Series("", index=import_df.index)).fillna("").astype(str).tolist()),
@@ -1384,8 +1393,11 @@ elif active_tab == "Export":
     )
 
     with st.form(f"export_form_{st.session_state.export_editor_version}"):
+        editor_data = import_df
+        if "Duplicate Match" in import_df.columns and import_df["Duplicate Match"].map(has_duplicate_match).any():
+            editor_data = import_df.style.apply(highlight_duplicate_rows, axis=1)
         edited_import_df = st.data_editor(
-            import_df,
+            editor_data,
             use_container_width=True,
             hide_index=True,
             height=TABLE_HEIGHT,
